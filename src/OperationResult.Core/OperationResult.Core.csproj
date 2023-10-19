@@ -3,9 +3,10 @@
     <PropertyGroup>
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <PackageId>OperationResult.Core</PackageId>
-        <Version>0.1.0</Version>
+        <Version>0.1.1</Version>
         <Product>OperationResult.Core</Product>
         <Title>OperationResult.Core</Title>
+        <Author>Vojislav Petkovic</Author>
         <Description>
             The OperationResult utility
             - Provides consistent, strongly-typed generic return objects throughout different layers of an application, from database queries in repositories to service-level operations
