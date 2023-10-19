@@ -18,6 +18,7 @@
         <PackageReleaseNotes>🚀 Initial Release</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <IsPackable>true</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>

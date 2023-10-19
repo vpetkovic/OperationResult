@@ -25,7 +25,7 @@ jobs:
         run: dotnet restore OperationResult.sln
 
       - name: Build the NuGet package
-        run: dotnet build OperationResult.sln --configuration ${{ matrix.configuration }} --output ${{env.DOTNET_ROOT}}\Package
+        run: dotnet build src/OperationResult.Core/OperationResult.Core.csproj --configuration ${{ matrix.configuration }} --output ${{env.DOTNET_ROOT}}\Package
 
       - run: ls src
 
