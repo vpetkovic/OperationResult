@@ -25,16 +25,14 @@ jobs:
         run: dotnet restore OperationResult.sln
 
       - name: Build the NuGet package
-        run: dotnet build src/OperationResult.Core/OperationResult.Core.csproj --configuration ${{ matrix.configuration }} --output "${{env.DOTNET_ROOT}}\Package"
+        run: dotnet build src/OperationResult.Core/OperationResult.Core.csproj --configuration ${{ matrix.configuration }} --output "${{env.DOTNET_ROOT}}\Package" /maxcpucount:1
 
       - run: ls src
 
-      - run: ls OperationResult
-
-      - run: ls ${{env.DOTNET_ROOT}}\Package
+      - run: ls "${{env.DOTNET_ROOT}}\Package"
 
       - name: Run Unit Tests
-        run: dotnet test tests/OperationResult.Tests/OperationResult.Tests.csproj
+        run: dotnet test tests/OperationResults.Tests/OperationResults.Tests.csproj
 
       #- name: Publish NuGet Package OperationResult.Core
       #  run: dotnet nuget push ${{env.DOTNET_ROOT}}\Package\*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
