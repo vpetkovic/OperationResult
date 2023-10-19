@@ -28,7 +28,7 @@ public class OperationResultTests
     [Fact]
     public void IsFailure_ReturnsOperationResultWithSuccessFalse()
     {
-        var result = OperationResult.IsFailure(new { ErrorCode = "404" }, "Operation failed");
+        var result = OperationResult.IsFailure(new { ErrorCode = "404" });
 
         result.Success.Should().BeFalse();
         result.ErrorMessage.Should().Be("Operation failed");
@@ -80,7 +80,7 @@ public class OperationResultTests
         Func<Task<OperationResult<string>>> func = 
             async () => await Task.FromResult(OperationResult<string>.IsFailure("Error"));
 
-        var result = await OperationResultExtensions.TryOperationAsync<string>(async () =>
+        var result = await OperationResultExtensions.TryOperationAsync(async () =>
         {
             var result = await func();
             return (result.Result!, "Error");
@@ -126,7 +126,7 @@ public class OperationResultTests
     [Fact]
     public async Task TryOperationAsync_ExceptionHandlerInvoked()
     {
-        Func<Task> func = async () => throw new Exception("General Failure");
+        Func<Task> func = () => throw new Exception("General Failure");
         bool exceptionHandlerInvoked = false;
         void ExceptionHandler(Exception ex) => exceptionHandlerInvoked = true;
 
@@ -140,7 +140,7 @@ public class OperationResultTests
     [Fact]
     public async Task TryOperationAsync_CustomMessageProviderInvoked()
     {
-        Func<Task> func = async () => throw new Exception("General Failure");
+        Func<Task> func = () => throw new Exception("General Failure");
         bool customMessageProviderInvoked = false;
 
         string CustomMessageProvider(Exception ex)
@@ -171,7 +171,7 @@ public class OperationResultTests
     [Fact]
     public async Task TryOperationAsync_WithException_NoHandlers()
     {
-        Func<Task> func = async () => throw new Exception("Exception occurred");
+        Func<Task> func = () => throw new Exception("Exception occurred");
 
         var result = await OperationResultExtensions
             .TryOperationAsync(func);
@@ -185,7 +185,7 @@ public class OperationResultTests
     {
         bool exceptionHandled = false;
         void ExceptionHandler(Exception ex) => exceptionHandled = true;
-        Func<Task> func = async () => throw new Exception("Exception occurred");
+        Func<Task> func = () => throw new Exception("Exception occurred");
 
         var result = await OperationResultExtensions
             .TryOperationAsync(func, exceptionHandler: ExceptionHandler);
@@ -198,7 +198,7 @@ public class OperationResultTests
     public async Task TryOperationAsync_WithException_WithCustomMessageProvider()
     {
         string CustomMessageProvider(Exception ex) => "Custom message";
-        Func<Task> func = async () => throw new Exception("Exception occurred");
+        Func<Task> func = () => throw new Exception("Exception occurred");
 
         var result = await OperationResultExtensions
             .TryOperationAsync(func, customMessageProvider: CustomMessageProvider);
@@ -213,7 +213,7 @@ public class OperationResultTests
         bool exceptionHandled = false;
         void ExceptionHandler(Exception ex) => exceptionHandled = true;
         string CustomMessageProvider(Exception ex) => "Custom message";
-        Func<Task> func = async () => throw new Exception("Exception occurred");
+        Func<Task> func = () => throw new Exception("Exception occurred");
 
         var result = await OperationResultExtensions
             .TryOperationAsync(func, 
@@ -246,7 +246,7 @@ public class OperationResultTests
         Func<OperationResult<string>> func = 
             () => OperationResult<string>.IsFailure("Error");
 
-        var result = OperationResultExtensions.TryOperation<string>(() =>
+        var result = OperationResultExtensions.TryOperation(() =>
         {
             var result = func();
             return (result.Result!, "Error");
@@ -344,7 +344,7 @@ public class OperationResultTests
     [Fact]
     public void TryOperation_T_WithGeneralException_CustomMessageProviderInvoked()
     {
-        Func<Exception, string> customMessageProvider = (ex) => "Custom message";
+        string CustomMessageProvider(Exception ex) => "Custom message";
         Func<OperationResult<string>> func = 
             () => throw new Exception("General exception");
 
@@ -352,7 +352,7 @@ public class OperationResultTests
         {
             var result = func();
             return (result.Result!, null);
-        }, customMessageProvider: customMessageProvider);
+        }, customMessageProvider: CustomMessageProvider);
 
         result.Success.Should().BeFalse();
         result.ErrorMessage.Should().Be("Custom message");

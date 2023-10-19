@@ -90,8 +90,7 @@ public class OperationExceptionTest
     [InlineData(null)]
     public void OperationException_Constructor_ShouldAlloEmptyNullOrWhitespaceMessage(string message)
     {
-        string? test = null;
-        var exception = new OperationException(test);
+        var exception = new OperationException(message);
         exception.Should().NotBeNull();
     }
     

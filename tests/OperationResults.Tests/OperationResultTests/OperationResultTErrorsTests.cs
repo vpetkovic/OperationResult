@@ -16,7 +16,7 @@ public class OperationResultTErrorsTests
     [Fact]
     public void IsFailure_ReturnsOperationResultWithSuccessFalse()
     {
-        var result = OperationResult<string, string>.IsFailure("Error 404", "Operation failed");
+        var result = OperationResult<string, string>.IsFailure("Error 404");
 
         result.Success.Should().BeFalse();
         result.Result.Should().BeNull();

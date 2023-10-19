@@ -16,7 +16,7 @@ public class OperationResultTTests
     [Fact]
     public void IsFailure_ReturnsOperationResultWithSuccessFalse()
     {
-        var result = OperationResult<string>.IsFailure(new { ErrorCode = "404" }, "Operation failed");
+        var result = OperationResult<string>.IsFailure(new { ErrorCode = "404" });
 
         result.Success.Should().BeFalse();
         result.Result.Should().BeNull();
@@ -31,7 +31,7 @@ public class OperationResultTTests
         string expectedError = "Error 404";
 
         // Act
-        var result = OperationResult<string, string>.IsFailure(expectedError, "Operation failed");
+        var result = OperationResult<string, string>.IsFailure(expectedError);
 
         // Assert
         result.Errors.Should().Be(expectedError);
@@ -54,7 +54,7 @@ public class OperationResultTTests
         Func<Task<OperationResult<string>>> func 
             = () => throw new OperationException("Operation failed", errors);
             
-        var result = await OperationResultExtensions.TryOperationAsync<string>(async () =>
+        var result = await OperationResultExtensions.TryOperationAsync(async () =>
         {
             await func();
             return (String.Empty, errors);
@@ -69,7 +69,7 @@ public class OperationResultTTests
     public async Task TryOperationAsync_T_WithGeneralException_ExceptionHandlerNotInvoked()
     {
         Func<Task<OperationResult<string>>> func = 
-            async () => throw new Exception("General exception");
+            () => throw new Exception("General exception");
 
         var result = await OperationResultExtensions.TryOperationAsync<string>(async () =>
         {
@@ -87,7 +87,7 @@ public class OperationResultTTests
         bool handlerInvoked = false;
         void ExceptionHandler(Exception ex) => handlerInvoked = true;
         Func<Task<OperationResult<string>>> func = 
-            async () => throw new Exception("General exception");
+            () => throw new Exception("General exception");
 
         var result = await OperationResultExtensions.TryOperationAsync<string>(async () =>
         {
@@ -105,7 +105,7 @@ public class OperationResultTTests
     {
         string CustomMessageProvider(Exception ex) => "Custom message";
         Func<Task<OperationResult<string>>> func = 
-            async () => throw new Exception("General exception");
+            () => throw new Exception("General exception");
 
         var result = await OperationResultExtensions.TryOperationAsync(async () =>
         {
@@ -119,9 +119,9 @@ public class OperationResultTTests
     [Fact]
     public async Task TryOperationAsync_T_NoException_ReturnsSuccess()
     {
-        Func<Task<(string, object?)>> func = async () => (String.Empty, default);
+        Func<Task<(string, object?)>> func = () => Task.FromResult<(string, object?)>((String.Empty, default));
 
-        var result = await OperationResultExtensions.TryOperationAsync<string>(func);
+        var result = await OperationResultExtensions.TryOperationAsync(func);
 
         result.Success.Should().BeTrue();
         result.Result.Should().BeEmpty();
