@@ -29,7 +29,7 @@ jobs:
 
       - run: ls src
 
-      - run: ls ${{env.DOTNET_ROOT}}\Package
+      - run: ls "${{env.DOTNET_ROOT}}\Package"
 
       - name: Run Unit Tests
         run: dotnet test tests/OperationResult.Tests/OperationResult.Tests.csproj
