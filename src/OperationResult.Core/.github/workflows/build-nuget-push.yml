@@ -1,0 +1,40 @@
+name: Build and Push NuGet Package
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        configuration: [ Release ]
+        dotnet: [ '6.0.x', '7.0.x', '8.0.x' ]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: ${{ matrix.dotnet }}
+
+      - name: Install dependencies
+        run: dotnet restore OperationResult.sln
+
+      - name: Build the NuGet package
+        run: dotnet build OperationResult.sln --configuration ${{ matrix.configuration }} --output ${{env.DOTNET_ROOT}}\Package
+
+      - run: ls src
+
+      - run: ls OperationResult
+
+      - run: ls ${{env.DOTNET_ROOT}}\Package
+
+      - name: Run Unit Tests
+        run: dotnet test tests/OperationResult.Tests/OperationResult.Tests.csproj
+
+      #- name: Publish NuGet Package OperationResult.Core
+      #  run: dotnet nuget push ${{env.DOTNET_ROOT}}\Package\*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate

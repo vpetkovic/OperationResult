@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
+        <PackageId>OperationResult.Core</PackageId>
+        <Version>0.1.0</Version>
+        <Product>OperationResult.Core</Product>
+        <Title>OperationResult.Core</Title>
+        <Description>
+            The OperationResult utility
+            - Provides consistent, strongly-typed generic return objects throughout different layers of an application, from database queries in repositories to service-level operations
+        </Description>
+        <RepositoryUrl>https://github.com/vpetkovic/OperationResult</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>result;operationresult;.net;dotnet;c#</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+        <PackageReleaseNotes>🚀 Initial Release</PackageReleaseNotes>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Content Include=".github\workflows\build-nuget-push.yml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="icon.png">
+        <Pack>True</Pack>
+        <PackagePath></PackagePath>
+      </None>
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,26 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/Highlighting/HighlightingSourceSnapshotLocation/@EntryValue">C:\Users\vpetkovic\AppData\Local\JetBrains\Rider2023.2\resharper-host\temp\Rider\vAny\CoverageData\_OperationResult.245835846\Snapshot\snapshot.utdcvr</s:String>
+	
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=968ecdaa_002D6805_002D425b_002Daa07_002Df37ada767cab/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="ShouldConvertObjectToOperationResult" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;xUnit::4CA8B7BD-737F-4188-AF6E-6D13EB46EA2B::net8.0::OperationResults.Tests.OperationResultTests.ShouldConvertObjectToOperationResult&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::4CA8B7BD-737F-4188-AF6E-6D13EB46EA2B::net8.0::OperationResults.Tests.OperationExceptionTest&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::4CA8B7BD-737F-4188-AF6E-6D13EB46EA2B::net8.0::OperationResults.Tests.OperationResultTests.OperationException_Constructor_ShouldSetMessageAndErrors&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::4CA8B7BD-737F-4188-AF6E-6D13EB46EA2B::net8.0::OperationResults.Tests.OperationResultTErrorsTests.IsSuccess_ReturnsOperationResultWithSuccessTrue&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::4CA8B7BD-737F-4188-AF6E-6D13EB46EA2B::net8.0::OperationResults.Tests.OperationResultTTests.IsSuccess_ReturnsOperationResultWithSuccessTrue&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::4CA8B7BD-737F-4188-AF6E-6D13EB46EA2B::net8.0::OperationResults.Tests.OperationResultTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::4CA8B7BD-737F-4188-AF6E-6D13EB46EA2B::net8.0::OperationResults.Tests.OperationResultTTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::4CA8B7BD-737F-4188-AF6E-6D13EB46EA2B::net8.0::OperationResults.Tests.OperationResultTErrorsTests.IsFailure_ReturnsOperationResultWithSuccessFalse&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::4CA8B7BD-737F-4188-AF6E-6D13EB46EA2B::net8.0::OperationResults.Tests.OperationResultTErrorsTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::4CA8B7BD-737F-4188-AF6E-6D13EB46EA2B::net6.0::OperationResults.Tests.OperationResultTErrorsTests.IsSuccess_ReturnsOperationResultWithSuccessTrue&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::4CA8B7BD-737F-4188-AF6E-6D13EB46EA2B::net7.0::OperationResults.Tests.OperationResultTErrorsTests.IsSuccess_ReturnsOperationResultWithSuccessTrue&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::4CA8B7BD-737F-4188-AF6E-6D13EB46EA2B::net6.0::OperationResults.Tests.OperationResultTErrorsTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::4CA8B7BD-737F-4188-AF6E-6D13EB46EA2B::net7.0::OperationResults.Tests.OperationResultTErrorsTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::4CA8B7BD-737F-4188-AF6E-6D13EB46EA2B::net6.0::OperationResults.Tests.OperationResultTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::4CA8B7BD-737F-4188-AF6E-6D13EB46EA2B::net7.0::OperationResults.Tests.OperationResultTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::4CA8B7BD-737F-4188-AF6E-6D13EB46EA2B::net6.0::OperationResults.Tests.OperationResultTTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::4CA8B7BD-737F-4188-AF6E-6D13EB46EA2B::net7.0::OperationResults.Tests.OperationResultTTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::4CA8B7BD-737F-4188-AF6E-6D13EB46EA2B::net6.0::OperationResults.Tests.OperationExceptionTest&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::4CA8B7BD-737F-4188-AF6E-6D13EB46EA2B::net7.0::OperationResults.Tests.OperationExceptionTest&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
