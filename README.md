@@ -6,3 +6,20 @@
 
 # OperationResult
 Provides consistent, strongly-typed generic return objects throughout different layers of an application, from database queries in repositories to service-level operations
+
+Usage Example
+```csharp
+public record User(string name);
+
+(User, List<Error>) createdUser = await OperationResultExtensions.TryOperationAsync<User>(async () => 
+{
+  var user = new User("John");
+  
+  await _someDbContext.Users.Add(user);
+  await _someDbContext.SaveChangesAsync();
+  
+  return (user, default);
+}, onException => Rollback());
+```
+
+- [ ] Add More usage examples
