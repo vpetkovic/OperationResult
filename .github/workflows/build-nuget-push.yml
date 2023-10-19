@@ -32,7 +32,7 @@ jobs:
       - run: ls "${{env.DOTNET_ROOT}}\Package"
 
       - name: Run Unit Tests
-        run: dotnet test tests/OperationResult.Tests/OperationResult.Tests.csproj
+        run: dotnet test tests/OperationResults.Tests/OperationResults.Tests.csproj
 
       #- name: Publish NuGet Package OperationResult.Core
       #  run: dotnet nuget push ${{env.DOTNET_ROOT}}\Package\*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
