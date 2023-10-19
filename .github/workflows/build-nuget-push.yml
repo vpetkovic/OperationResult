@@ -29,8 +29,6 @@ jobs:
 
       - run: ls src
 
-      - run: ls OperationResult
-
       - run: ls ${{env.DOTNET_ROOT}}\Package
 
       - name: Run Unit Tests
