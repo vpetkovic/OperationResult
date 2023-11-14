@@ -11,7 +11,7 @@ Usage Example
 ```csharp
 public record User(string name);
 
-(User, List<Error>) createdUser = await OperationResultExtensions.TryOperationAsync<User>(async () => 
+OperationResult<User> createdUser = await OperationResultExtensions.TryOperationAsync<User>(async () => 
 {
   var user = new User("John");
   
