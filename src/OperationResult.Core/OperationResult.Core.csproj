@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+        <TargetFramework>net6.0</TargetFramework>
         <PackageId>OperationResult.Core</PackageId>
-        <Version>0.1.1</Version>
+        <Version>0.2.0</Version>
         <Product>OperationResult.Core</Product>
         <Title>OperationResult.Core</Title>
         <Author>Vojislav Petkovic</Author>
@@ -16,7 +16,7 @@
         <PackageTags>result;operationresult;.net;dotnet;c#</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-        <PackageReleaseNotes>🚀 Initial Release</PackageReleaseNotes>
+        <PackageReleaseNotes>🚀 Set target framework to net6.0 and update package version</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>true</IsPackable>
