@@ -54,7 +54,7 @@ public class OperationResultTTests
         Func<Task<OperationResult<string>>> func 
             = () => throw new OperationException("Operation failed", errors);
             
-        var result = await OperationResultExtensions.TryOperationAsync(async () =>
+        var result = await OperationResultExtensions.TryOperationAsync<object>(async () =>
         {
             await func();
             return (String.Empty, errors);
