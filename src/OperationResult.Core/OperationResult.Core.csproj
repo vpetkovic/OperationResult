@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <PackageId>OperationResult.Core</PackageId>
-        <Version>0.2.0</Version>
+        <Version>0.2.1</Version>
         <Product>OperationResult.Core</Product>
         <Title>OperationResult.Core</Title>
         <Author>Vojislav Petkovic</Author>
@@ -16,7 +16,7 @@
         <PackageTags>result;operationresult;.net;dotnet;c#</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-        <PackageReleaseNotes>🚀 Set target framework to net6.0 and update package version</PackageReleaseNotes>
+        <PackageReleaseNotes>Expand error handling in OperationResultExtensions</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>true</IsPackable>

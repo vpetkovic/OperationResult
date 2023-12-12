@@ -29,15 +29,37 @@ public static class OperationResultExtensions
             }
             return OperationResult<T>.IsSuccess(result);
         }
-        catch (OperationException opex) 
+        catch (Exception ex)
         {
-            return OperationResult<T>.IsFailure(opex.Errors, opex.Message);
+            exceptionHandler?.Invoke(ex);
+            var customMessage = customMessageProvider?.Invoke(ex) ?? ex.Message;
+            return ex is OperationException opex
+                ? OperationResult<T>.IsFailure(opex.Errors, customMessage)
+                : OperationResult<T>.IsFailure(default, customMessage);
         }
-        catch (Exception e)
+    }
+    
+    public static async Task<OperationResult<T, TErrors>> TryOperationAsync<T, TErrors>(
+        Func<Task<(T, TErrors?)>> func,
+        Action<Exception>? exceptionHandler = null,
+        Func<Exception, string>? customMessageProvider = null)
+    {
+        try
         {
-            exceptionHandler?.Invoke(e);
-            var customMessage = customMessageProvider?.Invoke(e) ?? e.Message;
-            return OperationResult<T>.IsFailure(default, customMessage);
+            var (result, errors) = await func();
+            if (errors != null) 
+            {
+                return OperationResult<T, TErrors>.IsFailure(errors);
+            }
+            return OperationResult<T, TErrors>.IsSuccess(result);
+        }
+        catch (Exception ex)
+        {
+            exceptionHandler?.Invoke(ex);
+            var customMessage = customMessageProvider?.Invoke(ex) ?? ex.Message;
+            return ex is OperationException<TErrors> opex
+                ? OperationResult<T, TErrors>.IsFailure(opex.Errors, customMessage)
+                : OperationResult<T, TErrors>.IsFailure(default, customMessage);
         }
     }
     
@@ -73,15 +95,37 @@ public static class OperationResultExtensions
             }
             return OperationResult<T>.IsSuccess(result);
         }
-        catch (OperationException opex) 
+        catch (Exception ex)
         {
-            return OperationResult<T>.IsFailure(opex.Errors, opex.Message);
+            exceptionHandler?.Invoke(ex);
+            var customMessage = customMessageProvider?.Invoke(ex) ?? ex.Message;
+            return ex is OperationException opex
+                ? OperationResult<T>.IsFailure(opex.Errors, customMessage)
+                : OperationResult<T>.IsFailure(default, customMessage);
         }
-        catch (Exception e)
+    }
+    
+    public static OperationResult<T, TErrors> TryOperation<T, TErrors>(
+        Func<(T, TErrors?)> func,
+        Action<Exception>? exceptionHandler = null,
+        Func<Exception, string>? customMessageProvider = null)
+    {
+        try
         {
-            exceptionHandler?.Invoke(e);
-            var customMessage = customMessageProvider?.Invoke(e) ?? e.Message;
-            return OperationResult<T>.IsFailure(default, customMessage);
+            var (result, errors) = func();
+            if (errors != null) 
+            {
+                return OperationResult<T, TErrors>.IsFailure(errors);
+            }
+            return OperationResult<T, TErrors>.IsSuccess(result);
+        }
+        catch (Exception ex)
+        {
+            exceptionHandler?.Invoke(ex);
+            var customMessage = customMessageProvider?.Invoke(ex) ?? ex.Message;
+            return ex is OperationException<TErrors> opex
+                ? OperationResult<T, TErrors>.IsFailure(opex.Errors, customMessage)
+                : OperationResult<T, TErrors>.IsFailure(default, customMessage);
         }
     }
     
