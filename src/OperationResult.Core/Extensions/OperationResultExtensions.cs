@@ -2,6 +2,7 @@ namespace OperationResult.Core;
 
 public static class OperationResultExtensions
 {
+    #region To be removed when all tests are rewriten to use new simplified API
     public static OperationResult<T> ToOperationResult<T>(this T? entity, string? errorMessage = default)
         => entity is null
             ? OperationResult<T>.IsFailure(errorMessage ?? "Entity is null")
@@ -146,4 +147,28 @@ public static class OperationResultExtensions
             return OperationResult.IsFailure(default, errorMessage: customMessage);
         }
     }
+    
+    #endregion
+    
+    public static TResponse ToDtoResponse<T, TResponse>(
+        this OperationResult<T> operationResult, 
+        Func<T, TResponse> successMapping, 
+        Func<string?, TResponse> failureMapping)
+    {
+        return operationResult.Success
+            ? successMapping(operationResult.Result!)
+            : failureMapping(operationResult.ErrorMessage);
+    }
+    
+    public static TResponse ToDtoResponse<T, TErrors, TResponse>(
+        this OperationResult<T, TErrors> operationResult, 
+        Func<T, TResponse> successMapping, 
+        Func<TErrors, string?, TResponse> failureMapping)
+    {
+        return operationResult.Success
+            ? successMapping(operationResult.Result!)
+            : failureMapping(operationResult.Errors, operationResult.ErrorMessage);
+    }
+
+    
 }
