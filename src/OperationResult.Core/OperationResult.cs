@@ -1,47 +1,24 @@
 ﻿namespace OperationResult.Core;
 
-public class OperationResult<T>
+public class OperationResult<T> : OperationResultBase<OperationResult<T>, T, object>
 {
-    public bool Success { get; private set; }
-    public string? ErrorMessage { get; private set; }
-    
-    public object? Errors { get; private set; }
-    
-    public T? Result { get; private set; }
-
-    public static OperationResult<T> IsFailure(object? errors, string? errorMessage = "Operation failed") 
-        => new() { Success = false, ErrorMessage = errorMessage, Errors = errors};
-
-    public static OperationResult<T> IsSuccess(T? result = default) 
-        => new() { Success = true, Result = result };
+    public static OperationResult<T> ToOperationResult(T? entity, string? errorMessage = default)
+        => entity is null
+            ? IsFailure(errorMessage ?? "Entity is null")
+            : IsSuccess(entity);
 }
 
-public class OperationResult<T, TErrors>
+public class OperationResult<T, TErrors> : OperationResultBase<OperationResult<T, TErrors>, T, TErrors>
 {
-    public bool Success { get; private set; }
-    public string? ErrorMessage { get; private set; }
-    
-    public TErrors? Errors { get; private set; }
-    
-    public T? Result { get; private set; }
-
-    public static OperationResult<T, TErrors> IsFailure(TErrors? errors, string? errorMessage = "Operation failed") 
-        => new() { Success = false, ErrorMessage = errorMessage, Errors = errors};
-
-    public static OperationResult<T, TErrors> IsSuccess(T? result = default) 
-        => new() { Success = true, Result = result };
+    public static OperationResult<T, TErrors> ToOperationResult(
+        T entity, 
+        TErrors? errors = default, 
+        string? errorMessage = default)
+        => entity is null || errors is not null
+            ? IsFailure(errors)
+            : IsSuccess(entity);
 }
 
-public class OperationResult
+public class OperationResult : OperationResultBase<OperationResult, object, object>
 {
-    public bool Success { get; private set; }
-    public string? ErrorMessage { get; private set; }
-    
-    public object? Errors { get; private set; }
-
-    public static OperationResult IsFailure(object? errors, string? errorMessage = "Operation failed") 
-        => new() { Success = false, ErrorMessage = errorMessage, Errors = errors};
-
-    public static OperationResult IsSuccess() 
-        => new() { Success = true };
 }
