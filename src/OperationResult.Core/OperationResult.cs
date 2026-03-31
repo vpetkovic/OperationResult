@@ -1,4 +1,6 @@
-﻿namespace OperationResult.Core;
+﻿using System;
+
+namespace OperationResult.Core;
 
 public class OperationResult<T>
 {

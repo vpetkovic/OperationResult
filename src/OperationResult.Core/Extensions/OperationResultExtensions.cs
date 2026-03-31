@@ -1,3 +1,6 @@
+using System;
+using System.Threading.Tasks;
+
 namespace OperationResult.Core;
 
 public static class OperationResultExtensions
