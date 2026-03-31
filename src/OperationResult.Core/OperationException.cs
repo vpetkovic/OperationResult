@@ -1,29 +1,39 @@
-﻿using System;
+using System;
 
 namespace OperationResult.Core;
 
-public class OperationException : Exception
+public class OperationException : OperationBaseException<object>
 {
-    public object? Errors { get; set; }
-		
-    public OperationException(string? message, object? errors) : base(message)
+    public OperationException(string? message, object? errors) : base(message, errors)
     {
-        Errors = errors;
     }
-		
-    public OperationException(string message) : base(message)
-    { }
+
+    public OperationException(string? message) : base(message)
+    {
+    }
 }
 
-public class OperationException<TErrors> : Exception
+public class OperationException<TErrors> : OperationBaseException<TErrors>
+{
+    public OperationException(string? message, TErrors? errors) : base(message, errors)
+    {
+    }
+
+    public OperationException(string? message) : base(message)
+    {
+    }
+}
+
+public abstract class OperationBaseException<TErrors> : Exception
 {
     public TErrors? Errors { get; set; }
-		
-    public OperationException(string message, TErrors? errors) : base(message)
+
+    protected OperationBaseException(string? message, TErrors? errors) : base(message)
     {
         Errors = errors;
     }
-		
-    public OperationException(string message) : base(message)
-    { }
+
+    protected OperationBaseException(string? message) : base(message)
+    {
+    }
 }

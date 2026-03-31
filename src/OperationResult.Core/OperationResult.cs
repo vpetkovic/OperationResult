@@ -1,49 +1,62 @@
-﻿using System;
+using System;
+using System.Threading.Tasks;
 
 namespace OperationResult.Core;
 
-public class OperationResult<T>
+public class OperationResult<T> : OperationResultBase<OperationResult<T>, T, object>
 {
-    public bool Success { get; private set; }
-    public string? ErrorMessage { get; private set; }
-    
-    public object? Errors { get; private set; }
-    
-    public T? Result { get; private set; }
-
-    public static OperationResult<T> IsFailure(object? errors, string? errorMessage = "Operation failed") 
-        => new() { Success = false, ErrorMessage = errorMessage, Errors = errors};
-
-    public static OperationResult<T> IsSuccess(T? result = default) 
-        => new() { Success = true, Result = result };
+    public static OperationResult<T> From(T? entity, string? errorMessage = default)
+        => entity is null
+            ? Fail(errorMessage ?? "Entity is null")
+            : Ok(entity);
 }
 
-public class OperationResult<T, TErrors>
+public class OperationResult<T, TErrors> : OperationResultBase<OperationResult<T, TErrors>, T, TErrors>
 {
-    public bool Success { get; private set; }
-    public string? ErrorMessage { get; private set; }
-    
-    public TErrors? Errors { get; private set; }
-    
-    public T? Result { get; private set; }
-
-    public static OperationResult<T, TErrors> IsFailure(TErrors? errors, string? errorMessage = "Operation failed") 
-        => new() { Success = false, ErrorMessage = errorMessage, Errors = errors};
-
-    public static OperationResult<T, TErrors> IsSuccess(T? result = default) 
-        => new() { Success = true, Result = result };
+    public static OperationResult<T, TErrors> From(
+        T entity,
+        TErrors? errors = default,
+        string? errorMessage = default)
+        => entity is null || errors is not null
+            ? Fail(errorMessage: errorMessage, errors: errors)
+            : Ok(entity);
 }
 
-public class OperationResult
+public class OperationResult : OperationResultBase<OperationResult, object, object>
 {
-    public bool Success { get; private set; }
-    public string? ErrorMessage { get; private set; }
-    
-    public object? Errors { get; private set; }
+    public static async Task<OperationResult> TryAsync(
+        Func<Task> func,
+        Action<Exception>? exceptionHandler = null,
+        Func<Exception, string>? customMessageProvider = null)
+    {
+        try
+        {
+            await func();
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            exceptionHandler?.Invoke(ex);
+            var customMessage = customMessageProvider?.Invoke(ex) ?? ex.Message;
+            return Fail(customMessage);
+        }
+    }
 
-    public static OperationResult IsFailure(object? errors, string? errorMessage = "Operation failed") 
-        => new() { Success = false, ErrorMessage = errorMessage, Errors = errors};
-
-    public static OperationResult IsSuccess() 
-        => new() { Success = true };
+    public static OperationResult Try(
+        Action action,
+        Action<Exception>? exceptionHandler = null,
+        Func<Exception, string>? customMessageProvider = null)
+    {
+        try
+        {
+            action();
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            exceptionHandler?.Invoke(ex);
+            var customMessage = customMessageProvider?.Invoke(ex) ?? ex.Message;
+            return Fail(customMessage);
+        }
+    }
 }

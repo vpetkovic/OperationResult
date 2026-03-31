@@ -4,7 +4,7 @@
         <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
         <LangVersion>latest</LangVersion>
         <PackageId>OperationResult.Core</PackageId>
-        <Version>1.0.0</Version>
+        <Version>2.0.0</Version>
         <Product>OperationResult.Core</Product>
         <Title>OperationResult.Core</Title>
         <Author>Vojislav Petkovic</Author>
@@ -17,7 +17,7 @@
         <PackageTags>result;operationresult;.net;dotnet;c#;netstandard</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-        <PackageReleaseNotes>Retarget to .NET Standard 2.0/2.1 for broader compatibility</PackageReleaseNotes>
+        <PackageReleaseNotes>v2.0 — API redesign: Ok/Fail factories, IsSuccess/IsFailure properties, Try/TryAsync on type, simple overloads, ToDtoResponse, .NET Standard 2.0/2.1</PackageReleaseNotes>
         <Nullable>enable</Nullable>
         <IsPackable>true</IsPackable>
     </PropertyGroup>

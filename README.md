@@ -20,53 +20,78 @@ OperationResult replaces all of that with a single pattern. Every operation retu
 
 ```csharp
 // No result, just success/failure
-OperationResult result = OperationResult.IsSuccess();
-OperationResult failure = OperationResult.IsFailure(message: "Something went wrong");
+OperationResult result = OperationResult.Ok();
+OperationResult failure = OperationResult.Fail("Something went wrong");
 
-if (result.Succeeded)
-    Console.WriteLine(result.Message); // null — no message on success unless you set one
+if (result.IsSuccess)
+    Console.WriteLine("It worked");
+
+if (failure.IsFailure)
+    Console.WriteLine(failure.ErrorMessage); // "Something went wrong"
 
 // With a result value
-OperationResult<User> userResult = OperationResult<User>.IsSuccess(new User("John"));
+OperationResult<User> userResult = OperationResult<User>.Ok(new User("John"));
 
-if (userResult.Succeeded)
+if (userResult.IsSuccess)
     Console.WriteLine(userResult.Result!.Name); // "John"
 
-// Failure with untyped errors
-OperationResult<User> failedResult = OperationResult<User>.IsFailure(
-    errors: new { Field = "Email", Reason = "Already taken" },
-    message: "User creation failed"
+// Failure with message only — message is always the first parameter
+OperationResult<User> notFound = OperationResult<User>.Fail("User not found");
+
+// Failure with message and untyped errors
+OperationResult<User> failedResult = OperationResult<User>.Fail(
+    errorMessage: "User creation failed",
+    errors: new { Field = "Email", Reason = "Already taken" }
 );
 
 // Failure with strongly-typed errors
 OperationResult<User, List<ValidationError>> typedFailure =
-    OperationResult<User, List<ValidationError>>.IsFailure(
+    OperationResult<User, List<ValidationError>>.Fail(
+        errorMessage: "Validation failed",
         errors: new List<ValidationError>
         {
             new("Email", "Already taken"),
             new("Username", "Too short")
-        },
-        message: "Validation failed"
+        }
     );
 ```
 
-### Repository Method with TryOperationAsync
+### Repository Method with TryAsync
 
 Wraps your operation in a try-catch and returns a clean result. No more scattered exception handling.
 
 ```csharp
 public async Task<OperationResult<User>> CreateUserAsync(string name, string email)
 {
-    return await OperationResultExtensions.TryOperationAsync<User>(async () =>
+    // Simple overload — just return the result
+    return await OperationResult<User>.TryAsync(async () =>
     {
         var user = new User(name, email);
-
         await _dbContext.Users.AddAsync(user);
         await _dbContext.SaveChangesAsync();
-
-        return (user, default); // (result, errors) — errors is null on success
+        return user;
     },
-    onException: ex => _logger.LogError(ex, "Failed to create user"));
+    exceptionHandler: ex => _logger.LogError(ex, "Failed to create user"));
+}
+```
+
+When you need to return errors from within the operation (not just exceptions), use the tuple overload:
+
+```csharp
+public async Task<OperationResult<User>> CreateUserAsync(string name, string email)
+{
+    // Tuple overload — return (result, errors)
+    return await OperationResult<User>.TryAsync(async () =>
+    {
+        var existing = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (existing != null)
+            return (default(User)!, new { Reason = "Email already taken" }); // triggers failure
+
+        var user = new User(name, email);
+        await _dbContext.Users.AddAsync(user);
+        await _dbContext.SaveChangesAsync();
+        return (user, default); // success
+    });
 }
 ```
 
@@ -79,7 +104,7 @@ public record ValidationError(string Field, string Reason);
 
 public async Task<OperationResult<Order, List<ValidationError>>> PlaceOrderAsync(OrderRequest request)
 {
-    return await OperationResultExtensions.TryOperationAsync<Order, List<ValidationError>>(async () =>
+    return await OperationResult<Order, List<ValidationError>>.TryAsync(async () =>
     {
         var errors = new List<ValidationError>();
 
@@ -98,21 +123,55 @@ public async Task<OperationResult<Order, List<ValidationError>>> PlaceOrderAsync
 }
 ```
 
-### Converting Entities with ToOperationResult
+### Converting Entities with From / ToOperationResult
 
 Turn any object into an OperationResult. Null values automatically become failures.
 
 ```csharp
-// Entity found — wraps as success
+// Static method
 User? user = await _dbContext.Users.FindAsync(userId);
-OperationResult<User> result = user.ToOperationResult();
-// user is null → Succeeded = false
-// user exists → Succeeded = true, Result = user
+OperationResult<User> result = OperationResult<User>.From(user);
+// user is null → IsFailure = true, ErrorMessage = "Entity is null"
+// user exists → IsSuccess = true, Result = user
 
-// With strongly-typed errors on failure
-OperationResult<User, List<string>> result = user.ToOperationResult<User, List<string>>(
+// With custom error message
+OperationResult<User> result = OperationResult<User>.From(user, "User not found");
+
+// Extension method — same behavior
+OperationResult<User> result = user.ToOperationResult();
+OperationResult<User> result = user.ToOperationResult("User not found");
+
+// With strongly-typed errors
+OperationResult<User, List<string>> result = OperationResult<User, List<string>>.From(
+    entity: user,
     errors: new List<string> { "User not found" },
-    message: "Lookup failed"
+    errorMessage: "Lookup failed"
+);
+```
+
+### Mapping Results to DTOs with ToDtoResponse
+
+Map success and failure to a response type in one call.
+
+```csharp
+// Untyped errors
+var result = await OperationResult<User>.TryAsync(async () => { ... });
+
+var response = result.ToDtoResponse(
+    successMapping: user => new UserResponse { Id = user.Id, Name = user.Name },
+    failureMapping: error => new UserResponse { Error = error }
+);
+
+// Typed errors
+var result = await OperationResult<Order, List<ValidationError>>.TryAsync(async () => { ... });
+
+var response = result.ToDtoResponse(
+    successMapping: order => new OrderResponse { OrderId = order.Id },
+    failureMapping: (errors, message) => new OrderResponse
+    {
+        Error = message,
+        ValidationErrors = errors
+    }
 );
 ```
 
@@ -123,18 +182,17 @@ Override the default exception message with something meaningful to your callers
 ```csharp
 public async Task<OperationResult<Report>> GenerateReportAsync(Guid reportId)
 {
-    return await OperationResultExtensions.TryOperationAsync<Report>(
+    return await OperationResult<Report>.TryAsync(
         async () =>
         {
             var data = await _dataService.FetchAsync(reportId);
-            var report = _reportBuilder.Build(data);
-            return (report, default);
+            return _reportBuilder.Build(data);
         },
-        onException: ex => _logger.LogError(ex, "Report generation failed"),
+        exceptionHandler: ex => _logger.LogError(ex, "Report generation failed"),
         customMessageProvider: ex => $"Could not generate report {reportId}: {ex.Message}"
     );
 }
-// On exception: Succeeded = false, Message = "Could not generate report abc123: timeout"
+// On exception: IsFailure = true, ErrorMessage = "Could not generate report abc123: timeout"
 ```
 
 ### Sync Operations
@@ -142,59 +200,61 @@ public async Task<OperationResult<Report>> GenerateReportAsync(Guid reportId)
 Same pattern, no async. Works for in-memory logic, calculations, parsing.
 
 ```csharp
-// Sync with result
-OperationResult<int> parsed = OperationResultExtensions.TryOperation<int>(() =>
-{
-    var value = int.Parse(input);
-    return (value, default);
-});
+// Simple — just return the result
+OperationResult<int> parsed = OperationResult<int>.Try(() => int.Parse(input));
 
-// Sync with typed errors
+// Tuple — return result + errors
 OperationResult<Config, List<string>> config =
-    OperationResultExtensions.TryOperation<Config, List<string>>(() =>
+    OperationResult<Config, List<string>>.Try(() =>
     {
         var cfg = ConfigParser.Parse(filePath);
         return (cfg, default);
     });
 
-// Sync void — just success/failure, no result
-OperationResult result = OperationResultExtensions.TryOperation(() =>
+// Void — just success/failure, no result
+OperationResult result = OperationResult.Try(() =>
 {
     _cache.Invalidate(key);
-    return default; // errors — null means success
 });
 ```
 
-### Using OperationException for Domain-Specific Errors
+### OperationException for Domain Boundary Crossing
 
-Throw structured exceptions that carry error context, not just a message string.
+When domain code can't return an `OperationResult` (e.g., entity methods, value objects), throw an `OperationException` with structured errors. `TryAsync`/`Try` at the service boundary catches it and preserves the error context in the result.
 
 ```csharp
-// Throw with typed errors
-var errors = new List<ValidationError>
+// Domain layer — throws structured exception
+public class Order
 {
-    new("Price", "Cannot be negative"),
-    new("Name", "Required")
-};
+    public void AddItem(Product product, int quantity)
+    {
+        if (quantity <= 0)
+            throw new OperationException<string>("Invalid quantity", "Must be greater than zero");
+    }
+}
 
-// Always throws if errors is ICollection with Count > 0
-errors.Throw<List<ValidationError>>("Validation failed");
+// Service boundary — TryAsync catches it, errors flow into the result
+public async Task<OperationResult<Order>> CreateOrderAsync(Product product, int quantity)
+{
+    return await OperationResult<Order>.TryAsync(async () =>
+    {
+        var order = new Order();
+        order.AddItem(product, quantity);  // may throw OperationException
+        await _repo.SaveAsync(order);
+        return order;
+    });
+}
+// If AddItem throws: IsFailure = true, ErrorMessage = "Invalid quantity"
 
-// Always throws regardless of content
-errors.ThrowIfNullOrEmpty<List<ValidationError>>("Validation failed");
-
-// Throw with just a message
-OperationExceptionExtensions.Throw("Something broke");
-
-// Catch and inspect
+// Catch and inspect directly when needed
 try
 {
-    errors.Throw<List<ValidationError>>("Validation failed");
+    order.AddItem(product, -1);
 }
-catch (OperationException<List<ValidationError>> ex)
+catch (OperationException<string> ex)
 {
-    List<ValidationError> typedErrors = ex.Errors; // strongly typed
-    string message = ex.Message; // "Validation failed"
+    string? error = ex.Errors;   // "Must be greater than zero"
+    string message = ex.Message; // "Invalid quantity"
 }
 ```
 
@@ -209,9 +269,9 @@ app.MapPost("/users", async (CreateUserRequest req, UserService service) =>
 {
     var result = await service.CreateUserAsync(req.Name, req.Email);
 
-    return result.Succeeded
+    return result.IsSuccess
         ? Results.Created($"/users/{result.Result!.Id}", result.Result)
-        : Results.BadRequest(new { result.Message, result.Errors });
+        : Results.BadRequest(new { result.ErrorMessage, result.Errors });
 });
 ```
 
@@ -225,15 +285,12 @@ public class UserService
 
     public async Task<OperationResult<User>> CreateUserAsync(string name, string email)
     {
-        // Repository returns OperationResult — no exceptions to catch
         var result = await _repo.CreateUserAsync(name, email);
 
-        if (!result.Succeeded)
+        if (result.IsFailure)
             return result; // pass failure straight through
 
-        // Fire-and-forget side effect — failures here don't affect the response
         await _email.SendWelcomeAsync(result.Result!);
-
         return result;
     }
 }
@@ -248,12 +305,12 @@ public class UserRepository
 
     public async Task<OperationResult<User>> CreateUserAsync(string name, string email)
     {
-        return await OperationResultExtensions.TryOperationAsync<User>(async () =>
+        return await OperationResult<User>.TryAsync(async () =>
         {
             var user = new User(name, email);
             await _db.Users.AddAsync(user);
             await _db.SaveChangesAsync();
-            return (user, default);
+            return user;
         },
         customMessageProvider: ex => $"Failed to persist user: {ex.Message}");
     }
@@ -262,9 +319,46 @@ public class UserRepository
 
 The endpoint doesn't know how the user was created. The service doesn't know what database is behind the repository. Each layer returns `OperationResult<User>`, and failures bubble up with full context.
 
+## Migrating from 0.x to 2.0
+
+Version 2.0 is a full API redesign. Here's what changed:
+
+### Breaking Changes
+
+| 0.x | 2.0 | Notes |
+|-----|-----|-------|
+| `.Success` (bool) | `.IsSuccess` / `.IsFailure` | Property renamed; `IsFailure` added as convenience |
+| `OperationResult<T>.IsSuccess(result)` | `OperationResult<T>.Ok(result)` | Factory renamed |
+| `OperationResult<T>.IsFailure(errors, message)` | `OperationResult<T>.Fail(message, errors)` | Factory renamed, **parameter order swapped** — message first |
+| `OperationResultExtensions.TryOperationAsync<T>(...)` | `OperationResult<T>.TryAsync(...)` | Now a static method on the type |
+| `OperationResultExtensions.TryOperation<T>(...)` | `OperationResult<T>.Try(...)` | Now a static method on the type |
+| `OperationExceptionExtensions.ThrowIfNullOrEmpty(errors)` | Removed | Use `Fail()` or tuple return instead of throwing |
+| `OperationExceptionExtensions.Throw()` | Removed | Use `throw new OperationException(...)` directly when needed |
+| `entity.ToOperationResult<T, TErrors>()` | `OperationResult<T, TErrors>.From(entity)` | Static method; untyped extension `.ToOperationResult()` still works |
+| Target: `net6.0` | Target: `netstandard2.0` / `netstandard2.1` | Broader compatibility |
+
+### New in 2.0
+
+- **Simple `Try`/`TryAsync` overloads** — return just the result, no tuple ceremony for the happy path
+- **`ToDtoResponse`** — map success/failure to a DTO in one call
+- **`OperationResultBase<TSelf, TResult, TErrors>`** — shared base class eliminates duplication
+- **`OperationBaseException<TErrors>`** — shared exception base class
+- **`IsFailure` property** — `if (result.IsFailure)` reads naturally
+- **`From` static method** — `OperationResult<T>.From(entity)` for entity conversion
+
+### Quick Find-and-Replace
+
+```
+.Success           →  .IsSuccess
+IsSuccess(         →  Ok(
+IsFailure(errors,  →  Fail(errorMessage:, errors:   ← check parameter order
+TryOperationAsync  →  TryAsync
+TryOperation       →  Try
+```
+
 ## Requirements
 
-- .NET 6+
+- .NET Standard 2.0+ (compatible with .NET Framework 4.6.1+, .NET Core 2.0+, .NET 5+)
 
 ## License
 

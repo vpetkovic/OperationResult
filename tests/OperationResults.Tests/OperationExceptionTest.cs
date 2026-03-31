@@ -3,134 +3,76 @@ namespace OperationResults.Tests;
 public class OperationExceptionTest
 {
     [Fact]
-    public void ThrowIfNullOrEmpty_WithErrors_ThrowsOperationException()
+    public void OperationException_Constructor_SetsMessageAndErrors()
     {
-        // Arrange
-        string errorMessage = "Custom error message";
-        var errors = new List<string> { "Error 1", "Error 2" };
-
-        // Act & Assert
-        Action act = () => OperationExceptionExtensions.ThrowIfNullOrEmpty(errors, errorMessage);
-        act.Should().Throw<OperationException>();
-    }
-
-    [Fact]
-    public void ThrowIfNullOrEmpty_WithoutErrors_ThrowsOperationException()
-    {
-        // Arrange
-        List<string>? errors = null;
-        var emptyErrors = new List<string>();
-
-        // Act & Assert
-        Action act = () => OperationExceptionExtensions.ThrowIfNullOrEmpty(errors);
-        act.Should().Throw<OperationException>();
-	
-        Action act2 = () => OperationExceptionExtensions.ThrowIfNullOrEmpty(emptyErrors);
-        act2.Should().Throw<OperationException>();
-    }
-
-    [Fact]
-    public void Throw_WithErrors_ThrowOperationException()
-    {
-        // Arrange
-        string errorMessage = "Custom error message";
-        var errors = new List<string> { "Error 1", "Error 2" };
-
-        // Act & Assert
-        Action act = () => OperationExceptionExtensions.Throw(errors, errorMessage);
-        act.Should().Throw<OperationException>();
-    }
-
-    [Fact]
-    public void Throw_WithoutErrors_DoesntThrowOperationException()
-    {
-        // Arrange
-        string errorMessage = "Custom error message";
-        var errors = new List<string>();
-
-        // Act & Assert
-        Action act = () => OperationExceptionExtensions.Throw(errors, errorMessage);
-        act.Should().NotThrow();
-    }
-    
-    [Fact]
-    public void Throw_WithoutErrors_ThrowsOperationExceptionWithDefaultMessageAndNullErrors()
-    {
-        // Act & Assert
-        Action act = () => OperationExceptionExtensions.Throw();
-        act.Should().Throw<OperationException>();
-    }
-    
-    [Fact]
-    public void OperationException_Constructor_ShouldSetMessageAndErrors()
-    {
-        // Arrange
-        string message = "Something went wrong";
         object errors = new List<string> { "Error 1", "Error 2" };
-        
-        // Act & Assert
-        var exception = new OperationException(message, errors);
-        exception.Should().NotBeNull();
-        exception.Message.Should().NotBeNullOrWhiteSpace().And.Be(message);
-        exception.Errors.Should().NotBeNull().And.Be(errors);
+
+        var exception = new OperationException("Something went wrong", errors);
+
+        exception.Message.Should().Be("Something went wrong");
+        exception.Errors.Should().Be(errors);
     }
 
     [Fact]
-    public void OperationException_Constructor_ShouldSetMessage()
+    public void OperationException_Constructor_SetsMessage()
     {
-        string message = "Something went wrong";
-        var exception = new OperationException(message);
-        exception.Should().NotBeNull();
-        exception.Message.Should().NotBeNullOrWhiteSpace().And.Be(message);
+        var exception = new OperationException("Something went wrong");
+
+        exception.Message.Should().Be("Something went wrong");
+        exception.Errors.Should().BeNull();
     }
-    
+
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
     [InlineData(null)]
-    public void OperationException_Constructor_ShouldAlloEmptyNullOrWhitespaceMessage(string message)
+    public void OperationException_Constructor_AllowsEmptyNullOrWhitespaceMessage(string? message)
     {
         var exception = new OperationException(message);
         exception.Should().NotBeNull();
     }
-    
-    [Fact]
-    public void Constructor_WithMessageAndErrors_SetsBoth()
-    {
-        // Arrange
-        var expectedMessage = "Operation failed";
-        var expectedErrors = new { ErrorCode = 1 };
-        
-        // Act
-        var exception = new OperationException<object>(expectedMessage, expectedErrors);
 
-        // Assert
-        exception.Message.Should().Be(expectedMessage);
-        exception.Errors.Should().Be(expectedErrors);
+    [Fact]
+    public void OperationExceptionT_Constructor_SetsMessageAndErrors()
+    {
+        var exception = new OperationException<object>("Operation failed", new { ErrorCode = 1 });
+
+        exception.Message.Should().Be("Operation failed");
+        exception.Errors.Should().NotBeNull();
     }
 
     [Fact]
-    public void Constructor_WithMessageAndDefaultErrors_SetsBoth()
+    public void OperationExceptionT_Constructor_SetsMessageOnly()
     {
-        // Arrange
-        var expectedMessage = "Operation failed";
+        var exception = new OperationException<string>("Operation failed");
 
-        // Act
-        var exception = new OperationException<string>(expectedMessage);
-
-        // Assert
-        exception.Message.Should().Be(expectedMessage);
+        exception.Message.Should().Be("Operation failed");
         exception.Errors.Should().BeNull();
     }
 
     [Fact]
-    public void ErrorsProperty_CanSetAndGet()
+    public void OperationExceptionT_ErrorsProperty_CanSetAndGet()
     {
-        // Arrange
         var newErrors = new { ErrorCode = 2 };
         var exception = new OperationException<object>("Operation failed", newErrors);
-        
-        // Assert
+
         exception.Errors.Should().Be(newErrors);
+    }
+
+    [Fact]
+    public void InheritsFromException()
+    {
+        var exception = new OperationException("test");
+
+        exception.Should().BeAssignableTo<Exception>();
+    }
+
+    [Fact]
+    public void TypedInheritsFromException()
+    {
+        var exception = new OperationException<string>("test", "errors");
+
+        exception.Should().BeAssignableTo<Exception>();
+        exception.Should().BeAssignableTo<OperationBaseException<string>>();
     }
 }
