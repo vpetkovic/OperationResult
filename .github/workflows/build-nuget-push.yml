@@ -1,38 +1,55 @@
-name: Build and Push NuGet Package
+name: Build and Push NuGet Packages
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Package version (e.g. 1.0.1). Overrides tag-based version.'
+        required: false
+  push:
+    tags:
+      - 'v*'
 
 permissions:
   contents: read
 
 jobs:
   build:
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        configuration: [ Release ]
-        dotnet: [ '6.0.x', '7.0.x' ]
+    runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Set up .NET Core
-        uses: actions/setup-dotnet@v3
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ matrix.dotnet }}
+          dotnet-version: |
+            8.0.x
+            10.0.x
 
-      - name: Install dependencies
+      - name: Determine version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=1.0.0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Restore dependencies
         run: dotnet restore OperationResult.sln
 
-      - name: Build the NuGet package
-        run: dotnet build src/OperationResult.Core/OperationResult.Core.csproj --configuration ${{ matrix.configuration }} --output "${{env.DOTNET_ROOT}}\Package" /maxcpucount:1
+      - name: Build solution
+        run: dotnet build OperationResult.sln --configuration Release --no-restore
 
-      - run: ls src
+      - name: Run tests
+        run: dotnet test tests/OperationResults.Tests/OperationResults.Tests.csproj --configuration Release --no-restore --no-build
 
-      - run: ls "${{env.DOTNET_ROOT}}\Package"
+      - name: Pack NuGet packages
+        run: |
+          dotnet pack src/OperationResult.Core/OperationResult.Core.csproj --configuration Release --no-build --output packages /p:Version=${{ steps.version.outputs.VERSION }}
 
-      - name: Run Unit Tests
-        run: dotnet test tests/OperationResults.Tests/OperationResults.Tests.csproj
-
-      - name: Publish NuGet Package OperationResult.Core
-        run: dotnet nuget push "${{env.DOTNET_ROOT}}\Package\*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      - name: Push NuGet packages
+        run: dotnet nuget push "packages/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
